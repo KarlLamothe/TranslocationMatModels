@@ -1,6 +1,4 @@
 ################################################################################
-#        1         2         3         4         5          6        7         8                   
-#2345678901234567890123456789012345678901234567890123456789012345678901234567890
 ################################################################################
 # Eastern Sand Darter
 # Repatriation model
@@ -10,7 +8,7 @@
 rm(list = ls())  ### clear the workspace
 
 # Set working directory
-setwd("C:/Users/vanderleea/Desktop/DFO/SARA/Eastern Sand Darter")
+setwd("")
 
 # Load Libraries
 library(pacman)
@@ -21,7 +19,6 @@ p_load(RColorBrewer)
 
 #-------------------------------------------------------------------------------
 # Functions
-
 # Files to source 
 source("Rscript 01 - functions.r")  # sub routines for parameter fitting
 
@@ -42,32 +39,27 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 
 #-------------------------------------------------------------------------------
 # Data
-
 LWdata <- read.csv("ESD-Length.weight.csv", header = T)
 
 #===============================================================================
 # Parameters
-
 # Initalize list to store parameter info
 lh_data <- NULL   # life history data; parameters to est. growth, fecundity, and survival
 
 #-------------------------------------------------------------------------------
 # GROWTH
 #-------------------------------------------------------------------------------
-
 lh_data$H0 <- 5.6 # mm; Simon et al. 1992; COSEWIC 2009
 
 # Von Bert growth function - Finch 2013
 lh_data$Linf <- 55.52
 lh_data$k <- 1.59
 lh_data$t0 <- -0.47
-
 #-------------------------------------------------------------------------------
 # Length-Weight Relationship
 #-------------------------------------------------------------------------------
 
 mod <- nls(Weight ~ a * Length ^ b, data = LWdata, start = list(a = 1, b = 3))
-
 L <- seq(20, 70, 0.25)
 pred_data <- as.data.frame(list(
   Length = L,
@@ -118,7 +110,6 @@ lh_data$p.rep = c(0, lh_data$MO1, lh_data$MO2, 1, 1)
 #-------------------------------------------------------------------------------
 # SURVIVAL
 #-------------------------------------------------------------------------------
-
 lh_data$S0 <- NA
 lh_data$Sa <- 0.386 # Finch 2018
 
@@ -137,7 +128,6 @@ lh_data$Sa <- 0.386 # Finch 2018
 #   0,                  0,              s2,             0,              0,
 #   0,                  0,              0,              s3,             0)
  
-
 # PRE-SPAWN
 # Tmat = 1; Tmax = 4
 A.esd <- expression(
@@ -146,39 +136,32 @@ A.esd <- expression(
   0,                  s2,             0,              0,      
   0,                  0,              s3,             0)
 
-
 #===============================================================================
 # Functions
-
 # fucntion to parameterize matrix with different life history characteristics
 # 8 matrices possible:
 # Tmax - age 3 ro 4
 # Tmat - age 1 or 2
 # clutches - 2 or 3 per year
 lh_func <- function(Tmax, Tmat, clutch, data) {
-  
   # Tmax = 4, Tmat = 1, clutch = 2
   lh <- with(data, list(s0 = Syoy, s1 = Sa, s2 = Sa, s3 = Sa,
                         f1 = f, f2 = f, f3 = f, f4 = f, 
                         MO1= 0.911, P = 2, R = 0.5, a.f = 1))
-  
   # if Tmax = 3
   if(Tmax == 3) {
     lh$s3 <- 0     # change survival rate at age-3 = 0%
     lh$f4 <- 0     # change fecundity at age-4 to 0
   } 
-  
   # if tmat = 2
   if(Tmat == 2) {
     lh$MO1 <- 0     # change prop mature at age-1 tp 0
     lh$f1 <- 0      # change fecundity at age-1 to 0
   } 
-  
   # if clutch = 3
   if(clutch == 3) {
     lh$P <- 3       # change number of annual spawns to 3
   } 
-  
   lh
 } 
 
@@ -263,10 +246,8 @@ names(lh_data$s0.max.det) <- L.names
 
 # mean projection matrix - lambda = 1
 pmx.1.det <- lapply(1:length(lh_params), function(x) {
-  
   data <- lh_data
   data$Syoy <- lh_data$s0.1.det[[x]]
-  
   pmx <- pmx_eval(A.esd, lh_func(Tmax = lh_params[[x]]$Tmax, 
                                  Tmat = lh_params[[x]]$Tmat,  
                                  clutch = lh_params[[x]]$clutch, data))
@@ -277,10 +258,8 @@ names(pmx.1.det) <- lh_names
 # mean projection matrix - lambda = max lambdas
 pmx.max.det <- lapply(1:length(max.lambdas), function(l) {
   lhs <- lapply(1:length(lh_params), function(x) {
-  
     data <- lh_data
     data$Syoy <- lh_data$s0.max.det[[l]][[x]]
-    
     pmx <- pmx_eval(A.esd, lh_func(Tmax = lh_params[[x]]$Tmax, 
                                    Tmat = lh_params[[x]]$Tmat,  
                                    clutch = lh_params[[x]]$clutch, data))
@@ -294,7 +273,6 @@ names(pmx.max.det) <- L.names
 # generation time
 
 lh_data$gen.time.lh <- median(sapply(1:length(lh_params), function(x) {
-  
   pmx <- pmx.1.det[[x]]
   generation.time(pmx, c = c(1:4))
 }))
@@ -326,16 +304,12 @@ f_rand <- function(means, sd) {
     } else {
       qlnorm(pX, meanlog = log(x), sd = sd) # convert non-0s to log-normal distribution
     }
-    
   })
-  
   fs
-  
 }
 
 # Function to est. stochatic survival
 s_rand <- function(means, cv, X = NA) {
-  
   if(is.finite(X)){
     X = X
   } else {
@@ -356,9 +330,7 @@ s_rand <- function(means, cv, X = NA) {
       M <- qbeta(pX, shape1 = params$a, shape2 = params$b) * (params$max - params$min) + params$min # convert non-0s to beta distribution for M
       exp(-M) # Convert M to survival rate
     }
-    
   })
-  
   list(ss = ss, X = X) # output survival rate
 }
 
@@ -370,12 +342,9 @@ s_rand <- function(means, cv, X = NA) {
 # solve for YOY survival rate to acheive a desires lambda under environmental stochasticity
 optim_f <- function(v, target.lambda, type, reps, N0, data, 
                     Tmax, Tmat, clutch) {
-  
   data$Syoy <- v
-
   lh_mean <- lh_func(Tmax = Tmax, Tmat = Tmat, clutch = clutch, data = data)
   data$p.rep = c(lh_mean$MO1, 1, 1, 1)
-  
   seed <- 123
   set.seed(seed)
   pop_data <- lapply(1:reps, function(i) {
@@ -385,33 +354,25 @@ optim_f <- function(v, target.lambda, type, reps, N0, data,
                       N0 = N0,        # initial pop size as stage-structure vector
                       years = 150,    # years to run simulation
                       p.cat = 0       # Probability of castastrophe
-
     )
     res$pop[-(1:51), 1:2]
   })
   
   # est mean population growth rate
   if(type == "logmu") {
-    
     pop_data <- do.call(rbind, pop_data)
     pop_data <- pop_data[pop_data$N > 0, ]
     pop_data <- pop_data[is.finite(pop_data$N), ]
-    
     mod <- lm(log(N) ~ year, data = pop_data)
     lambda.est <- exp(coef(mod)[[2]])
-    
   } else if(type == "loglambda") {
-    
     log.lambdas <- sapply(pop_data, function(i) {
       i <- i[is.finite(i$N), ]
       (log(i$N[dim(i)[1]]) - log(i$N[1])) / dim(i)[1]
     })
-    
     lambda.est <- exp(mean(log.lambdas))
   }
-  
   (lambda.est - target.lambda)^2
-  
 }
 
 #-------------------------------------------------------------------------------
@@ -419,7 +380,6 @@ optim_f <- function(v, target.lambda, type, reps, N0, data,
 # s0 @ lambda = 1
 
 if(FALSE) {
-  
   # s0 @ lambda = 1 - in parallel over CVs, cor.rhos and maxlambdas
   no_cores <- detectCores() - 1    # number of cores
   cl <- makeCluster(no_cores)      # create clusters
@@ -438,7 +398,6 @@ if(FALSE) {
 
   names(s_optim.1) <- lh_names
   stopCluster(cl) # close clusters
-  
   s_optim.1
   
   # s0 @ lambda = max - in parallel over CVs, cor.rhos and maxlambdas
@@ -448,11 +407,9 @@ if(FALSE) {
   clusterEvalQ(cl, library(popbio))# load library in clusters
   s_optim.max <- parLapply(cl, max.lambdas, function(lambda) {
     lhs <- lapply(1:length(lh_params), function(x) {
-      
       data <- lh_data
       data$gen.time <- lh_data$gen.time.lh[[x]]
       data$b <- 0
-      
       s_optim_min <- optimize(optim_f, c(0, 1), tol = 1e-16,  target.lambda = lambda, 
                               type = "loglambda", reps = 5000, N0 = 10000,
                               data = data,  Tmax = lh_params[[x]]$Tmax, 
@@ -465,7 +422,6 @@ if(FALSE) {
   })
   names(s_optim.max ) <- L.names
   stopCluster(cl) # close clusters
-  
   s_optim.max
   
    # clean up
@@ -491,7 +447,6 @@ lh_data$s0.max.sto <- list(
 )
 names(lh_data$s0.max.sto) <- L.names  
 
-
 #-------------------------------------------------------------------------------
 # Density Dependence
 #-------------------------------------------------------------------------------
@@ -499,11 +454,8 @@ names(lh_data$s0.max.sto) <- L.names
 # such that the geometric mean population size is K
 
 if(FALSE){
-  
   b_optim_f <- function(b.d, N0, reps, data, lh_mean) {
-    
     data$b <- b.d
-  
     seed <- 123
     set.seed(seed)
     pop_data <- lapply(1:reps, function(i) {
@@ -529,18 +481,15 @@ if(FALSE){
   # Run Optimization
   
   N0 <- 10000 # target pop size - Carrying capacity
-  
   no_cores <- detectCores() - 1    # number of cores
   cl <- makeCluster(no_cores)      # create clusters
   clusterExport(cl, ls())          # send data to clusters
   clusterEvalQ(cl, library(popbio))# load library in clusters
   
   b.dd.est <- parLapply(cl, 1:length(max.lambdas), function(l) { # loop over max almbdas
-    lhs <- lapply(1:length(lh_params), function(x) { # loop over life history params
-      
+    lhs <- lapply(1:length(lh_params), function(x) { # loop over life history params  
       data <- lh_data                           # data
       data$gen.time <- lh_data$gen.time.lh      # assign generatioin time - based on LH data
-      
       data$Syoy = data$s0.1.sto[[x]]            # Syoy at lambda = 1
       data$s0.max = data$s0.max.sto[[l]][[x]]   # Syoy at lambda = max
       
@@ -564,9 +513,7 @@ if(FALSE){
     lhs
   })
   names(b.dd.est) <- L.names
-  
   stopCluster(cl) # close clusters
-  
   b.dd.est
   
   # clean up
@@ -631,19 +578,14 @@ rm(Et, DD_data, Nt, AE_data, p)
 # plot variability of vital rates and lambda
 
 if(FALSE) {
-
   reps <- 1000
   Na <- 10000
   years <- 100
-  
   var_sim <- {
-    
     x <- 1
     l <- 2 # max lambda 2
-    
     data <- lh_data                           # data
     data$gen.time <- lh_data$gen.time.lh      # assign generatioin time - based on LH data
-    
     data$Syoy = data$s0.1.sto[[x]]            # Syoy at lambda = 1
     data$s0.max = data$s0.max.sto[[l]][[x]]   # Syoy at lambda = max
     
@@ -726,7 +668,6 @@ if(FALSE) {
     do.call(rbind, f)
   }
   
-  
   p <- ggplot(ft, aes(x = var)) 
   p <- p + geom_density(fill = "grey", alpha = 0.5)
   p <- p + labs(x = "Length (mm)", y = "Density", fill = "Life History")           
@@ -765,7 +706,6 @@ if(FALSE) {
   p <- p + labs(x = "Instantaneous Mortality", y = "Density", fill = "Stage")           
   p <- p + theme_me +
     theme(axis.text.y = element_blank())
-  
   png("Figures/Mortality dist.png", width = 3.5, height = 3, unit = "in", res = 300)
   p
   dev.off()
@@ -842,8 +782,7 @@ if(FALSE) {
                               p.cat = p.cat,             # propability of catastrophe
                               density_dependence = TRUE, # Include density dependence
                               demographic_stoch = TRUE,  # Include dempgraphic stochasticity
-                              allee = TRUE               # include Allee effects
-                              
+                              allee = TRUE               # include Allee effects        
             )
             N = res$pop$N
           }) # reps
@@ -855,13 +794,12 @@ if(FALSE) {
     NULL
   }) # pop growth rate
   stopCluster(cl)
-  
   rm(MVPsim.sDD)
 }
 
 #-------------------------------------------------------------------------------
 # MVP ESTIAMTEION
-
+                         
 # Load and extract data
 if(FALSE){
   PVA_data <- do.call(rbind, lapply(max.lambdas, function(l){             # Loop through lambdas
@@ -960,7 +898,6 @@ if(FALSE){
   png("Figures/MVP.png", width = 7.5, height = 4.5, unit = "in", res = 300)
   p
   dev.off()
-  
 }
 
 MVP_sDD <- list(
@@ -1851,31 +1788,19 @@ for(stock_time.r in c("pre.spawn", "post.spawn")){   # Stock time repatiration
   }
 }
 
-
-
 #################################################################################
-
 #################################################################################
-
-
-
 
 reps = 1000
-
 data <- lh_data
 syears <- 10
 l <- 1
 x <- 2
-
 Ninit =  MVP_sDD[[l]][[x]]$MVP[2] 
-
 Nt <- 000
-
 data$gen.time <- lh_data$gen.time.lh[[x]] # assign generatioin time - based on LH data
-
 data$Syoy = data$s0.1.sto[[x]]            # Syoy at lambda = 1
 data$s0.max = data$s0.max.sto[[l]][[x]]   # Syoy at lambda = max
-
 # assign LH mean values based on the lh parameters 
 lh_mean <- lh_func(Tmax = lh_params[[x]]$Tmax,     # Longevity
                    Tmat = lh_params[[x]]$Tmat,     # age-at maturity
@@ -1883,15 +1808,11 @@ lh_mean <- lh_func(Tmax = lh_params[[x]]$Tmax,     # Longevity
                    data = data)
 
 data$p.rep = c(lh_mean$MO1, 1, 1, 1) # Create proportion adult vector 
-
 data$b <- data$b_dd[[l]][[x]]/Ninit      # extract density dependent param and scale to carrying capacity
-
 
 # Translostion pop vectory - Age structure of translocated fish
 Nt.vec <- stable.stage(pmx.1.det[[x]]) * Nt
-
 out <- lapply(1:reps, function(i) {  # replicates
-  
   res <- source_harm(mx = A.esd,                                  # projection matrix expression
                       data = data,                                # life history data
                       lh_mean = lh_mean,                          # Mean vital rates
@@ -1911,12 +1832,9 @@ sum(sapply(out, function(i){
   any(i < 50)
 }))/reps
 
-
 mean(sapply(out, function(i){
   i[20]
 }))
-
-
 
 log.lambdas <- sapply(out, function(i) {
   i <- i[is.finite(i)]
@@ -1925,12 +1843,7 @@ log.lambdas <- sapply(out, function(i) {
 length(which(exp(log.lambdas) < 1))/reps
 length(which(exp(log.lambdas) ==0))/reps
 
-
 hist(exp(log.lambdas), breaks = 50)
-
-
-
-
 N0 <- 1000
 reps <- 1000
 
@@ -1944,20 +1857,16 @@ clusterEvalQ(cl, library(popbio))# load library in clusters
 
 pop<- parLapply(cl, 1:length(max.lambdas), function(l) { # population growth rate
   lhs <- lapply(1:length(lh_params), function(x) {              # life history
-    
     data <- lh_data
     data$gen.time <- data$gen.time.lh[[x]]
-    
     data$Syoy = data$s0.1.sto[[x]]
     data$s0.max = data$s0.max.sto[[l]][[x]]
-    
     lh_mean <- lh_func(Tmax = lh_params[[x]]$Tmax, 
                        Tmat = lh_params[[x]]$Tmat, 
                        clutch = lh_params[[x]]$clutch, data = data)
     data$p.rep <- c(lh_mean$MO1, 1, 1, 1)
-    
     data$b <- data$b_dd[[l]][[x]]/N0
-    
+        
     out <- lapply(1:reps, function(i) {                # replicates
       
       res <- Projection(mx = A.esd,                        # projection matrix expression
@@ -1980,17 +1889,7 @@ pop<- parLapply(cl, 1:length(max.lambdas), function(l) { # population growth rat
 })
 
 stopCluster(cl)
-
 pop
-
-
-
-
-
-
-
-
-
 
 N0 <- 10000
 reps <- 1000
@@ -2008,15 +1907,12 @@ pop<- parLapply(cl, 1:length(max.lambdas), function(l) { # population growth rat
     
     data <- lh_data
     data$gen.time <- data$gen.time.lh
-    
     data$Syoy = data$s0.max.sto[[l]][[x]]
     data$s0.max = data$s0.max.sto[[l]][[x]]
-    
     lh_mean <- lh_func(Tmax = lh_params[[x]]$Tmax, 
                        Tmat = lh_params[[x]]$Tmat, 
                        clutch = lh_params[[x]]$clutch, data = data)
     data$p.rep <- c(lh_mean$MO1, 1, 1, 1)
-    
     data$b <- data$b_dd[[l]][[x]]/N0
     
     out <- lapply(1:reps, function(i) {                # replicates
@@ -2041,6 +1937,4 @@ pop<- parLapply(cl, 1:length(max.lambdas), function(l) { # population growth rat
 })
 
 stopCluster(cl)
-
 pop
-
