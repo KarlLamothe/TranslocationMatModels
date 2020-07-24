@@ -1,3 +1,8 @@
 # TranslocationMatModels
 
-This repository was developed to house the RCode for running the translocation and allowable harm models from Lamothe et al. In Review. 
+## The translocation trade-off: balancing harm to source populations with the success of re-establishment
+**Authors**: Karl A. Lamothe, Adam S. van der Lee, D. Andrew R. Drake, and Marten A. Koops
+
+**Abstract**: Re-establishing a population by translocation requires a sufficiently large number of individuals from a source population, but removing too many individuals could lead to extirpation. To understand the trade-off between the probability of source population extirpation and translocation success, age-structured population matrix models that incorporate Allee effects, density dependence, and demographic and environmental stochasticity were combined with a model that simulates removals from source populations. We apply this model to translocation scenarios for the Threatened eastern sand darter (Ammocrypta pellucida) in Canada. Results suggest that translocations require abundant source populations as extirpation probability increased with the number and frequency of removals, and was worsened by mortality during and immediately following translocation. Uncertainty around life-history parameters and strengths of Allee effects led to high uncertainty around the required source population size. Although stochastic processes affected the probability of translocation success, other factors such as stocking density can be controlled, and therefore, translocation can be a viable strategy for the recovery of eastern sand darter, even when applying a cautious threshold to guard against uncertainty.
+
+Code written by Adam S. van der Lee and applied by Karl A. Lamothe
