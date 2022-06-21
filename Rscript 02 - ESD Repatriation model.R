@@ -43,7 +43,7 @@ LWdata <- read.csv("ESD-Length.weight1.csv", header = T)
 
 #===============================================================================
 # Parameters
-# Initalize list to store parameter info
+# Initialize list to store parameter info
 lh_data <- NULL   # life history data; parameters to est. growth, fecundity, and survival
 
 #-------------------------------------------------------------------------------
@@ -138,7 +138,7 @@ A.esd <- expression(
 
 #===============================================================================
 # Functions
-# fucntion to parameterize matrix with different life history characteristics
+# function to parameterize matrix with different life history characteristics
 # 8 matrices possible:
 # Tmax - age 3 ro 4
 # Tmat - age 1 or 2
@@ -187,7 +187,7 @@ names(lh_params) <- lh_names
 # Max lambda (Randal and Minns 2000) - rmax = 2.64*Wmat^-0.35 (take lower prediction interval)
 L_init <- with(lh_data, VB.growth(0:4, Linf = Linf, K = k, t0 = t0, names = T)) # length at age
 Wmat <- with(lh_data, a.LW * L_init ^ b.LW)[3]                                  # Weight at maturity (age-2)
-lambda.max <- round(exp(r_max_pred(Wmat, 0, interval = "prediction"))[[2]],2)   # Max lambda est from randall and minns lower prediction interval
+lambda.max <- round(exp(r_max_pred(Wmat, 0, interval = "prediction"))[[2]],2)   # Max lambda est from Randall and Minns (2000) lower prediction interval
 
 # clean up
 rm(Wmat, L_init)
@@ -203,7 +203,7 @@ L.names <- c(paste("Lambda -", max.lambdas[1]), paste("Lambda -", max.lambdas[2]
 # Syoy - age-0 survival rate
 # At lambda = 1 and lambda = lambda max
 
-# Optimization furntion - solve for syoy
+# Optimization function - solve for syoy
 s_optim = function (syoy, mx, data, Tmax, Tmat, clutch, target.lambda){
   
   data$Syoy <- syoy
@@ -290,13 +290,13 @@ lh_data$f.logsd <- 0.05
 # age-specific CV for Instantaneous mortality as a normal distribution
 lh_data$M.cv <- c(0.1, 0.2, 0.2, 0.2)
 
-# Function to est. stochatic fecundity 
+# Function to est. stochastic fecundity 
 f_rand <- function(means, sd) {
   
   X <- rnorm(1, mean = 0, sd = 1)  # Est standard normal residual
   pX <- pnorm(X, mean = 0, sd = 1) # Normal probability distribution
   
-  # Assign residual to each age; with age-specigic distribution
+  # Assign residual to each age; with age-specific distribution
   fs <- sapply(means, function(x){
     
     if(x == 0){                             # if 0 keep at 0
@@ -308,7 +308,7 @@ f_rand <- function(means, sd) {
   fs
 }
 
-# Function to est. stochatic survival
+# Function to est. stochastic survival
 s_rand <- function(means, cv, X = NA) {
   if(is.finite(X)){
     X = X
@@ -318,7 +318,7 @@ s_rand <- function(means, cv, X = NA) {
   
   pX <- pnorm(X, mean = 0, sd = 1) # Normal probability distribution
   
-  # Assign residual to each age; with age-specigic distribution
+  # Assign residual to each age; with age-specific distribution
   ss <- sapply(1:length(means), function(x){
     
     if(means[x] == 0){ # if 0 keep at 0
@@ -339,7 +339,7 @@ s_rand <- function(means, cv, X = NA) {
 #===============================================================================
 # Optimization function
 
-# solve for YOY survival rate to acheive a desires lambda under environmental stochasticity
+# solve for YOY survival rate to acheive a desired lambda under environmental stochasticity
 optim_f <- function(v, target.lambda, type, reps, N0, data, 
                     Tmax, Tmat, clutch) {
   data$Syoy <- v
@@ -585,7 +585,7 @@ if(FALSE) {
     x <- 1
     l <- 2 # max lambda 2
     data <- lh_data                           # data
-    data$gen.time <- lh_data$gen.time.lh      # assign generatioin time - based on LH data
+    data$gen.time <- lh_data$gen.time.lh      # assign generation time - based on LH data
     data$Syoy = data$s0.1.sto[[x]]            # Syoy at lambda = 1
     data$s0.max = data$s0.max.sto[[l]][[x]]   # Syoy at lambda = max
     
@@ -598,7 +598,7 @@ if(FALSE) {
     # Create proportion adult vector
     data$p.rep = c(lh_mean$MO1, 1, 1, 1)
   
-    # extract density dependenc paramter and scale to Na
+    # extract density dependence paramter and scale to Na
     data$b <- data$b_dd[[l]][[x]]/Na
     
     out <- lapply(1:reps, function(i) {                # replicates
@@ -608,7 +608,7 @@ if(FALSE) {
                         lh_mean = lh_mean,             # mean vital rate 
                         Na = Na,                       # initial pop size as stage-structure vector
                         years = years,                 # years to run simulation
-                        p.cat = 0,                     # propability of catastrophe
+                        p.cat = 0,                     # probability of catastrophe
                         density_dependence = c("Survival") # type of density dependence
       )
       
@@ -657,7 +657,7 @@ if(FALSE) {
   #-------------------------------------------------------------------------------
   # Fecundity
 
-  ft <- { # life histyory characteristics
+  ft <- { # life history characteristics
     f <- lapply(1:reps, function(i){              # Reps
       as.data.frame(list(
         max_lambda = max.lambdas[2],
@@ -684,7 +684,7 @@ if(FALSE) {
   #-------------------------------------------------------------------------------
   # Survival
   
-  st <- { # life histyory characteristics
+  st <- { # life history characteristics
     s <- lapply(1:reps, function(i){              # Reps
       as.data.frame(list(
         max_lambda = max.lambdas[2],
@@ -721,7 +721,7 @@ if(FALSE) {
 #===============================================================================
 # MVP SIMULATIONS
 #===============================================================================
-# estimate minimum viabpe population size
+# estimate minimum viable population size
 # conduct PVA for ESD - sim population with density dependence over 100 years
 # incorporate stochastic environmental effects and catastrophe (decline in total pop
 # size of 50 to 100%)
@@ -779,9 +779,9 @@ if(FALSE) {
                               lh_mean = lh_mean,         # mean vital rates for LH
                               N0 = N0,                   # initial pop size as stage-structure vector
                               years = years,             # years to run simulation
-                              p.cat = p.cat,             # propability of catastrophe
+                              p.cat = p.cat,             # probability of catastrophe
                               density_dependence = TRUE, # Include density dependence
-                              demographic_stoch = TRUE,  # Include dempgraphic stochasticity
+                              demographic_stoch = TRUE,  # Include demographic stochasticity
                               allee = TRUE               # include Allee effects        
             )
             N = res$pop$N
@@ -853,7 +853,7 @@ if(FALSE){
   #-----------------------------------------------------------------------------
   # Plot
   
-  # Data fro ploting
+  # Data for ploting
   # aggregate reps to est. prob of ext. per carrying capacity
   plot_data <- with(PVA_data, aggregate(P, by = list(pop, allee, LH, lambda), FUN = function(x) {sum(x)/reps}))
   names(plot_data) <- c("pop", "allee", "LH", "lambda", "P")
@@ -861,7 +861,7 @@ if(FALSE){
   plot_data$LH <- paste0("A", plot_data$LH)
   
   # Prediction data
-  # predict prob of extiction lines for plot - for each lambda and llife history
+  # predict prob of extiction lines for plot - for each lambda and life history
   Na <- seq(min(CC), max(CC), length.out = 1000)           # Na to predict over
   pred_data <- do.call(rbind, lapply(1:length(max.lambdas), function(l) { # max lambdas
     do.call(rbind, lapply(1:2, function(x) {                              # life history
@@ -941,21 +941,21 @@ rm(reps, years, p.cat, CC)
 # REPATRIATION MODEL
 #===============================================================================
 # Assess the potential success of translocation of ESD 
-# Run PVA model for ESD pop with inital density of 0. Add individuals age-1 to 
-# Tmax for syears (1 to 10). Vary number of indiviudals translocated.
+# Run PVA model for ESD pop with initial density of 0. Add individuals age-1 to 
+# Tmax for s years (1 to 10). Vary number of individuals translocated.
 # a portion will die during and soon after stocking (translocation mortality).
 # model included 3 levels of allee effects (weak to strong)
 # model includes density dependence on YOY survival - 3 level of pop growth  
 # 2 suites of life-history characters included
-# run for 500 reps for each combinatio of variables 
+# run for 5000 reps for each combination of variables 
 #-------------------------------------------------------------------------------
 
 reps <- 5000 # num. of replicates
 
-# propability of catastrophe - per generation
+# probability of catastrophe - per generation
 p.cat <- 0.1
 
-# Allee effect paraters
+# Allee effect parameters
 allee <- c(50, 100)
 
 # Stocking density - age 1 to Tmax ESD
@@ -1158,11 +1158,11 @@ for(stock_time in c("pre.spawn", "post.spawn")){
   names(plot_data) <- c("Mt", "s.years", "Nt", "allee", "LH", "lambda", "P")
   
   # Prediction data for plotting
-  Nx <- seq(10,2000, 2) # x valse for prediction
+  Nx <- seq(10,2000, 2) # x values for prediction
   pred_data <- lapply(1:length(max.lambdas), function(l){     # max lambda
     X <- lapply(1:2, function(x){                             # life history
       A <- lapply(1:length(allee), function(a.f) {            # Allee effect                    
-        Y <- lapply(1:length(stock.years), function(syears) { # Year sof stocking                   
+        Y <- lapply(1:length(stock.years), function(syears) { # Years of stocking                   
           M <- lapply(1:length(M.trans), function(M.t) {      # Translocation mortality
             as.data.frame(list(              # Pridiction data frame
               lambda = max.lambdas[l],       # LAMBDA
@@ -1170,15 +1170,15 @@ for(stock_time in c("pre.spawn", "post.spawn")){
               allee = paste0("Allee Effect: ", allee[a.f]),            # Carrying capacity
               s.years = paste0("Years Stocked: ",stock.years[syears]), # years of stocking
               Mt = M.trans[M.t],             # Translocation mortality
-              Nt = Nx,                       # Sotkcing density
+              Nt = Nx,                       # Stocking density
               P = predict(rpat_mod[[x]][[a.f]], # Predicted prob of success
                           data.frame(Nt = Nx, lambda = max.lambdas[l], 
                                      s.years = stock.years[syears], Mt = M.trans[M.t]), 
                           type = "response")
             ))
-          }) # Translocationmortality
+          }) # Translocation mortality
           do.call(rbind, M)
-        }) # yeras of stocking
+        }) # years of stocking
         do.call(rbind, Y)
       }) # allee effect
       do.call(rbind, A)
@@ -1222,7 +1222,7 @@ for(stock_time in c("pre.spawn", "post.spawn")){
   #-----------------------------------------------------------------------------
   # Find pop size when success is likely
   
-  # Optimization functi to find Nt at 90% success rate
+  # Optimization function to find Nt at 90% success rate
   optim_f <- function(Nx, mod, lambda, syears, Mt, target){
   
     P <- predict(mod, data.frame(Nt = Nx, lambda = lambda,  s.years = syears, Mt = Mt), 
@@ -1249,7 +1249,7 @@ for(stock_time in c("pre.spawn", "post.spawn")){
             ))
           }) # Translocation mortality
           do.call(rbind, M)
-        }) # Yera stocking
+        }) # Years stocking
         do.call(rbind, Y)
       }) # Allee effect
       do.call(rbind, A)
@@ -1295,16 +1295,16 @@ for(stock_time in c("pre.spawn", "post.spawn")){
     
   })
   
-} # clost stock time loop
+} # close stock time loop
 
 #===============================================================================
 # SOURCE POPULATION HARM 
 #===============================================================================
 # Assess harm to source population 
-# Run PVA model of source population. Inital pop size ranges form MVP to 10*MVP
-# Harm scenarios same and repatriation model: various stocking denisties &
+# Run PVA model of source population. Initial pop size ranges form MVP to 10*MVP
+# Harm scenarios same and repatriation model: various stocking densities &
 # stocking durations.
-# Nt individuals remove from pop for syears with viability tested later
+# Nt individuals remove from pop for s years with viability tested later
 #-------------------------------------------------------------------------------
 
 reps <- 5000 # num. of replicates
@@ -1312,7 +1312,7 @@ reps <- 5000 # num. of replicates
 # propability of catastrophe - per generation
 p.cat <- 0.1
 
-# Allee effect paraters
+# Allee effect parameters
 allee <- c(50, 100)
 
 # Stocking density - age 1 to Tmax ESD
@@ -1352,14 +1352,14 @@ for(stock_time in c("pre.spawn", "post.spawn")){ # Loop through stock times
           lapply(stock.years, function(syears) {                # years of stocking
             lapply(K, function(k){                              # Carrying Capacity
               data <- lh_data                           # data
-              data$gen.time <- lh_data$gen.time.lh      # assign generatioin time - based on LH data
+              data$gen.time <- lh_data$gen.time.lh      # assign generation time - based on LH data
               
               data$Syoy = data$s0.1.sto[[x]]            # Syoy at lambda = 1
               data$s0.max = data$s0.max.sto[[l]][[x]]   # Syoy at lambda = max
               
               # assign LH mean values based on the lh parameters 
               lh_mean <- lh_func(Tmax = lh_params[[x]]$Tmax,     # Longevity
-                                 Tmat = lh_params[[x]]$Tmat,     # age-at maturity
+                                 Tmat = lh_params[[x]]$Tmat,     # age-at-maturity
                                  clutch = lh_params[[x]]$clutch, # number of clutches
                                  data = data)
               
@@ -1368,7 +1368,7 @@ for(stock_time in c("pre.spawn", "post.spawn")){ # Loop through stock times
               data$b <- data$b_dd[[l]][[x]]/k      # extract density dependent param and scale to carrying capacity
               data$a <- allee[a.f]                 # Allee effect parameters - NA at 50% fecundity
               
-              # Translostion pop vectory - Age structure of translocated fish - Juv and Adults
+              # Translocation pop vector y - Age structure of translocated fish - Juv and Adults
               Nt.vec <- stable.stage(pmx.1.det[[x]]) * Nt
               
               out <- lapply(1:reps, function(i) {  # replicates
@@ -1380,7 +1380,7 @@ for(stock_time in c("pre.spawn", "post.spawn")){ # Loop through stock times
                                    t.time = stock_time,              # when stocking takes place ="pre.spawn" OR "post.spawn" 
                                    stock.max = syears,               # number of stocking events to take place
                                    years = 50,                       # years to run simulation
-                                   p.cat = 0.1                       # propability of catastrophe
+                                   p.cat = 0.1                       # probability of catastrophe
                 )
                 N = res$pop$N 
                 rm(res); gc()
@@ -1493,7 +1493,7 @@ for(stock_time in c("pre.spawn", "post.spawn")){
           # it logistic regression
           mod <- glm(P ~ log(Nt) + log(K), data = subData, family = binomial)
           mod
-        }) # Yeras of stocking
+        }) # Years of stocking
       }) # allee efects
     }) # life history
   }) # max lambda
@@ -1509,7 +1509,7 @@ for(stock_time in c("pre.spawn", "post.spawn")){
     })
   }))
   
-  # Optimization furntion - solve for syoy
+  # Optimization function - solve for syoy
   s_optim = function (syoy, mx, data, Tmax, Tmat, clutch, target.lambda){
     
     data$Syoy <- syoy
@@ -1556,7 +1556,7 @@ for(stock_time in c("pre.spawn", "post.spawn")){
   write.csv(mod.out, file = paste0(file.path, " - model.csv"), row.names = F)
   
   # Prediction data for plotting
-  Nx <- seq(0, 2000, 10) # x valse for prediction
+  Nx <- seq(0, 2000, 10) # x value for prediction
   Kx <- 10^(seq(log10(5000), log10(60000), length.out = 100))
   xvals <- expand.grid(Nx, round(Kx))
   
@@ -1564,17 +1564,17 @@ for(stock_time in c("pre.spawn", "post.spawn")){
     do.call(rbind, lapply(1:2, function(x){                              # life history
       do.call(rbind, lapply(1:length(allee), function(a.f){                             # allee effects
         do.call(rbind, lapply(1:length(stock.years), function(syears) {  # Year sof stocking                   
-          as.data.frame(list(              # Pridiction data frame
+          as.data.frame(list(              # Prediction data frame
             lambda = max.lambdas[l],       # LAMBDA
             LH = x,                        # life history
             allee = allee[a.f],            # allee effect
             s.years = stock.years[syears], # years of stocking
-            Nt = xvals[, 1],               # Sotkcing density
+            Nt = xvals[, 1],               # Stocking density
             K = xvals[, 2],                # Carrying Capacity
             P = predict(harm_mod[[l]][[x]][[a.f]][[syears]], # Predicted prob of success
                         data.frame(Nt = xvals[,1], K = xvals[,2]), type = "response")
           ))
-        })) # yeras of stocking
+        })) # years of stocking
       })) # allee effects
     })) # life history
   })) # max lambda
@@ -1639,7 +1639,7 @@ stock.years <- c(1, 5, 10)
 M.trans <- seq(0.1, 0.9, length.out = 5)
 
 for(stock_time.r in c("pre.spawn", "post.spawn")){   # Stock time repatiration
-  for(stock_time.h in c("pre.spawn", "post.spawn")){ # Stock tim harm
+  for(stock_time.h in c("pre.spawn", "post.spawn")){ # Stock time harm
     print(paste0("r - ", stock_time.r))
     print(paste0("h - ", stock_time.h))
     
@@ -1656,7 +1656,7 @@ for(stock_time.r in c("pre.spawn", "post.spawn")){   # Stock time repatiration
     load(paste0(file.path.harm, " - logistic model.R"))
     
     #-----------------------------------------------------------------------------
-    # predict K for source pop that give 1% extinction prob when repatriation is 90% successfull
+    # predict K for source pop that give 1% extinction prob when repatriation is 90% successful
     
     # Optimization function to find Nt needed for 90% repat success
     optim_rpat <- function(N, mod, lambda, s.years, Mt, target){
@@ -1680,7 +1680,7 @@ for(stock_time.r in c("pre.spawn", "post.spawn")){   # Stock time repatiration
     pred_data <- do.call(rbind, lapply(1:length(max.lambdas), function(l){ 
       do.call(rbind,lapply(1:length(stock.years), function(syears) {
         
-        # Repariation model
+        # Repatriation model
         mod.rpat <- rpat_mod[[1]][[2]]  #lambda = l, LH1, allee = 100
         
         # Harm model
@@ -1721,7 +1721,7 @@ for(stock_time.r in c("pre.spawn", "post.spawn")){   # Stock time repatiration
     )
     
     #-------------------------------------------------------------------------------
-        # Prediction data for plotting
+    # Prediction data for plotting
     # Lambda = 2.3
     # Life History 1
     # stock years = 10
@@ -1743,7 +1743,7 @@ for(stock_time.r in c("pre.spawn", "post.spawn")){   # Stock time repatiration
             s.years = paste0("Years Stocked: ", stock.years[y]), # years of stocking
             Mt = M.trans[3],             # Translocation mortality
             K = xvals[,2],
-            Nt = xvals[,1],                       # Sotkcing density
+            Nt = xvals[,1],                       # Stocking density
             P.succ = predict(rpat_mod[[1]][[a.f]], # Predicted prob of success
                         data.frame(Nt = xvals[,1], lambda = max.lambdas[l], 
                                    s.years = stock.years[y], Mt = M.trans[3]), 
@@ -1798,7 +1798,7 @@ l <- 1
 x <- 2
 Ninit =  MVP_sDD[[l]][[x]]$MVP[2] 
 Nt <- 000
-data$gen.time <- lh_data$gen.time.lh[[x]] # assign generatioin time - based on LH data
+data$gen.time <- lh_data$gen.time.lh[[x]] # assign generation time - based on LH data
 data$Syoy = data$s0.1.sto[[x]]            # Syoy at lambda = 1
 data$s0.max = data$s0.max.sto[[l]][[x]]   # Syoy at lambda = max
 # assign LH mean values based on the lh parameters 
@@ -1874,7 +1874,7 @@ pop<- parLapply(cl, 1:length(max.lambdas), function(l) { # population growth rat
                         lh_mean = lh_mean,
                         N0 = N0,                  # initial pop size as stage-structure vector
                         years = 200,              # years to run simulation
-                        p.cat = 0,                # propability of catastrophe
+                        p.cat = 0,                # probability of catastrophe
                         density_dependence = TRUE # type of density dependence
                         
       )
@@ -1922,7 +1922,7 @@ pop<- parLapply(cl, 1:length(max.lambdas), function(l) { # population growth rat
                         lh_mean = lh_mean,
                         N0 = N0,                       # initial pop size as stage-structure vector
                         years = 200,                   # years to run simulation
-                        p.cat = 0,                     # propability of catastrophe
+                        p.cat = 0,                     # probability of catastrophe
                         density_dependence = FALSE # type of density dependence
                         
       )
